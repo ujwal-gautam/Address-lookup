@@ -3,6 +3,7 @@ package com.careernet.addresslookup.controller;
 import com.careernet.addresslookup.dto.ApiResponse;
 import com.careernet.addresslookup.entity.BlacklistedPostcode;
 import com.careernet.addresslookup.service.BlackListService;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +19,7 @@ import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/blacklist")
+@Log4j2
 public class BlackListController {
 
     private final BlackListService blackListService;
@@ -29,19 +31,23 @@ public class BlackListController {
     // Get all blacklisted postcodes
     @GetMapping
     public ResponseEntity<ApiResponse<List<BlacklistedPostcode>>> getAll() {
+        log.info("BlackListController message = started fetch blacklist data");
         List<BlacklistedPostcode> list = blackListService.getAllBlacklistedPostcodes();
+        log.info("BlackListController message = end fetch blacklist data");
         return ResponseEntity.ok(new ApiResponse<>("Blacklisted postcodes retrieved", list, true));
     }
 
     @PostMapping("/add")
     public ResponseEntity<ApiResponse<BlacklistedPostcode>> add(@RequestParam(required = false) String postcode) {
         if (Objects.isNull(postcode) || postcode.isBlank()) {
+            log.warn("please check postcode value {}", postcode);
             return ResponseEntity.badRequest().body(new ApiResponse<>("Postcode cannot be null or empty", null, false));
         }
         try {
             BlacklistedPostcode added = blackListService.addPostcode(postcode.trim());
             return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>("Added to blacklist", added, true));
         } catch (IllegalArgumentException ex) {
+            log.error("BlackListController message = \"unexpected error for DB save\" error = {}", ex.getMessage(), ex);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>(ex.getMessage(), null, false));
         }
     }
@@ -55,6 +61,7 @@ public class BlackListController {
             blackListService.removePostcode(postcode.trim());
             return ResponseEntity.ok(new ApiResponse<>("Removed postcode: " + postcode.toUpperCase(), null, true));
         } catch (IllegalArgumentException ex) {
+            log.error("BlackListController message = \"unexpected error for remove postCode\" error = {}", ex.getMessage(), ex);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(ex.getMessage(), null, false));
         }
     }

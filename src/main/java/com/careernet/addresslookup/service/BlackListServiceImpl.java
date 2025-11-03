@@ -4,11 +4,13 @@ import com.careernet.addresslookup.entity.BlacklistedPostcode;
 import com.careernet.addresslookup.repository.AddressRepository;
 import com.careernet.addresslookup.repository.BlackListRepository;
 import jakarta.transaction.Transactional;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
 
+@Log4j2
 @Service
 public class BlackListServiceImpl implements BlackListService {
 
@@ -36,10 +38,12 @@ public class BlackListServiceImpl implements BlackListService {
         }
         boolean existsInAddress = addressRepository.existsByPostcode(postcode);
         if (!existsInAddress) {
+            log.info("BlackListServiceImpl message = \"Data not found for\" postCode {}", postcode);
             throw new IllegalArgumentException("Cannot blacklist postcode '" + postcode + "' because it does not exist in Address table.");
         }
 
         if (blackListRepository.existsByPostcode(postcode)) {
+            log.info("BlackListServiceImpl message = \"Postcode already blacklisted for\" postCode {}", postcode);
             throw new IllegalArgumentException("Postcode already blacklisted: " + postcode);
         }
         return blackListRepository.save(new BlacklistedPostcode(postcode));

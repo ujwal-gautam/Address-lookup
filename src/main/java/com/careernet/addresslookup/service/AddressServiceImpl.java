@@ -1,14 +1,14 @@
 package com.careernet.addresslookup.service;
 
 import com.careernet.addresslookup.entity.Address;
-import com.careernet.addresslookup.entity.BlacklistedPostcode;
 import com.careernet.addresslookup.repository.AddressRepository;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
+@Log4j2
 @Service
 public class AddressServiceImpl implements AddressService {
 
@@ -21,26 +21,14 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    public List<Address> getAllAddresses(boolean filterBlacklisted) {
-        List<Address> addresses = addressRepository.findAll();
-
-        if (!filterBlacklisted) {
-            return addresses;
-        }
-
-        List<BlacklistedPostcode> blacklisted = blackListService.getAllBlacklistedPostcodes();
-        return addresses.stream()
-                .filter(a -> !blacklisted.contains(a.getPostcode()))
-                .collect(Collectors.toList());
-    }
-
-    @Override
     public Address saveAddress(Address address) {
+        log.info("AddressServiceImpl message = save address details");
         return addressRepository.save(address);
     }
 
     @Override
     public List<Address> findAddressesByPostcode(String postcode, boolean filterBlacklisted) {
+        log.info("AddressServiceImpl message = find address data by post code");
         if (Objects.isNull(postcode) || postcode.isBlank()) {
             return List.of();
         }

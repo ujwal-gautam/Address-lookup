@@ -41,14 +41,6 @@ public class AddressController {
         return ResponseEntity.ok(new ApiResponse<>("Addresses retrieved", result, true));
     }
 
-    @GetMapping
-    public ResponseEntity<ApiResponse<List<Address>>> getAddresses(
-            @RequestParam(required = false, defaultValue = "false") boolean filterBlacklisted) {
-
-        List<Address> addresses = addressService.getAllAddresses(filterBlacklisted);
-        return ResponseEntity.ok(new ApiResponse<>("Addresses fetched successfully", addresses, true));
-    }
-
     @PostMapping("/add")
     public ResponseEntity<ApiResponse<Address>> addAddress(@RequestBody Address address) {
         if (Objects.isNull(address.getLine1()) || Objects.isNull(address.getCity()) || Objects.isNull(address.getPostcode())) {
